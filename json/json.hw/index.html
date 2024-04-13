@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <script defer src="./javascript.js"></script>
+    <title>DATABASE</title>
+</head>
+
+<body>
+    <div>
+        <label for="filterInput">Filter by Name:</label>
+        <input type="text" id="filterInput" />
+        <button id="filterButton">Filter</button>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th class="title">
+             Title
+                    <button id="sortButton"></button>
+   </th>
+                <th>Date</th>
+                <th>Title</th>
+              <th>Amount</th>
+                <th>Status</th>
+            </tr>  </thead>
+        <tbody id="data-output">
+
+        </tbody>
+    </table>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const sortButton = document.getElementById("sortButton");
+            const filterButton = document.getElementById("filterButton");
+            const dataOutput = document.getElementById("data-output");
+            const filterInput = document.getElementById("filterInput");
+            let ascendingOrder = true;
+            let information = []; // This array will store the original data
+
+            // Fetching data from the JSON file
+            fetch("information.json")
+                .then(response => response.json())
+                .then(data => {
+                    information = data;
+                    renderTable(data);
+                })
+                .catch(error => console.error("Data ERROR", error));
+
+            // Function to render the table
+            function renderTable(data) {
+                const tableHTML = data.map(info => `
+                    <tr>
+                        <td>${info.name}</td>
+                        <td>${info.date}</td>
+                        <td>${info.title}</td>
+                        <td>${info.amount}</td>
+                        <td><div class="danger">${info.status}</div></td>
+                    </tr>
+                `).join('');
+
+                dataOutput.innerHTML = tableHTML;
+            }
+
+            sortButton.addEventListener("click", function () {
+                ascendingOrder = !ascendingOrder;
+                information.sort((a, b) => {
+                    const nameA = a.name.toUpperCase();
+                    const nameB = b.name.toUpperCase();
+                    return ascendingOrder ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+                });
+                renderTable(information);
+            });
+
+            filterButton.addEventListener("click", function () {
+                const searchTerm = filterInput.value.trim().toLowerCase();
+                const filteredInformation = information.filter(info =>
+                    info.name.toLowerCase().includes(searchTerm)
+                );
+                renderTable(filteredInformation);
+            });
+        });
+    </script>
+</body>
+
+</html>
